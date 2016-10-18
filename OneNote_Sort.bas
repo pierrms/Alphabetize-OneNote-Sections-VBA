@@ -6,6 +6,9 @@ Sub AlphabetizeOneNoteSection()
 'Make sure to add the references to:
 'Microsoft OneNote 15.0 Object Library
 'Microsoft XML, 6.0
+
+    'I put this code together to solve a problem, I realize it is not perfectly optimized.
+    'If you have any input on how optimize the code, feel free to let me know.
     
 Dim notebookSortName As String
 
