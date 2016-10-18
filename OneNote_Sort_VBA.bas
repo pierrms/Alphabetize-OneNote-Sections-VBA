@@ -1,7 +1,7 @@
-Attribute VB_Name = "OneNoteSort"
+Attribute VB_Name = "OneNote1"
 
 
-Sub AlphabetizeOneNote_NoteBook()
+Sub AlphabetizeOneNoteSection()
 
 'Make sure to add the references to:
 'Microsoft OneNote 15.0 Object Library
@@ -10,11 +10,11 @@ Sub AlphabetizeOneNote_NoteBook()
     'I put this code together to solve a problem, I realize it is not perfectly optimized.
     'Add this code to your vba editor in Excel and make sure the notebook you want to sort is open in OneNote.
     'If you have any input on how optimize the code, feel free to let me know.
-    
+   
 Dim notebookSortName As String
 
 'Change the name of the library to the one that needs to alphabetized
-notebookSortName = "Put name of notebook here"
+notebookSortName = "Journal Entries"
 
 Dim onenote As onenote.Application
 Set onenote = New onenote.Application
@@ -49,6 +49,7 @@ If doc.LoadXML(oneNoteSectionsXml) Then
     Dim sectionNameXML As String
     Dim sectionIDXML As String
     Dim sectionPathXML As String
+    Dim sectionDeleted As String
     Dim parentID As String
     
     Dim i As Integer
@@ -87,7 +88,7 @@ If doc.LoadXML(oneNoteSectionsXml) Then
        i = i + 1
     Next
     
-    ReDim sectionArray(0 To 3, 0)
+    ReDim sectionArray(0 To 4, 0)
     r = 0
     For Each nodeSection In nodeSections
     Call onenote.GetHierarchyParent(nodeSection.Attributes.getNamedItem("ID").Text, parentID)
@@ -103,17 +104,23 @@ If doc.LoadXML(oneNoteSectionsXml) Then
         Next
         
         If notebookName = notebookSortName Then
-        ReDim Preserve sectionArray(3, r) As Variant
+        ReDim Preserve sectionArray(4, r) As Variant
             sectionIDXML = nodeSection.Attributes.getNamedItem("ID").XML
             sectionNameXML = nodeSection.Attributes.getNamedItem("name").XML
             sectionName = nodeSection.Attributes.getNamedItem("name").Text
             sectionPathXML = nodeSection.Attributes.getNamedItem("path").XML
+            
+            If Not (nodeSection.Attributes.getNamedItem("isInRecycleBin") Is Nothing) Then
+            sectionDeleted = nodeSection.Attributes.getNamedItem("isInRecycleBin").Text 'Make sure the section to be sorted is not deleted
+            End If
+            
             
 
             sectionArray(0, r) = sectionNameXML
             sectionArray(1, r) = sectionName
             sectionArray(2, r) = sectionIDXML
             sectionArray(3, r) = sectionPathXML
+            sectionArray(4, r) = sectionDeleted
             
             'Header for the XML code
             UpdateHierarchyHeader = "<?xml version=" & Chr(34) & "1.0" & Chr(34) & "?>" & vbCrLf & _
@@ -128,8 +135,8 @@ End If
 
 '    Transpose and sort array
 Set w = ThisWorkbook.Worksheets.Add()
-'MsgBox UBound(sectionArray, 2)
-Set sectionRange = w.Range(Cells(1, 1), Cells(UBound(sectionArray, 2) + 1, 4))
+
+Set sectionRange = w.Range(Cells(1, 1), Cells(UBound(sectionArray, 2) + 1, 5))
 sectionRange = Application.Transpose(sectionArray)
 
 w.Sort.SortFields.Add Key:=Range(Cells(1, 2), Cells(UBound(sectionArray, 2) + 1, 2)), _
@@ -153,9 +160,15 @@ Application.DisplayAlerts = True
 
 'populate body of xml
 For i = 1 To UBound(sectionArray)
+    sectionName = sectionArray(i, 2)  'Name
     sectionIDXML = sectionArray(i, 3)  'ID XML
     sectionPathXML = sectionArray(i, 4)  'Path XML
-    UpdateHierarchyBody = UpdateHierarchyBody & vbCrLf & "<one:Section " & sectionIDXML & " " & sectionPathXML & "/>"
+    If sectionDeleted <> "true" Then
+        UpdateHierarchyBody = UpdateHierarchyBody & vbCrLf & "<one:Section " & sectionIDXML & " " & sectionPathXML & "/>"
+    Else
+        Debug.Print sectionName
+    End If
+    'Debug.Print sectionName & " " & sectionIDXML; " " & sectionPathXML
 Next
 
 'populate footer of xml
@@ -167,7 +180,7 @@ UpdateHierarchyFooter = "    </one:Notebook>" & vbCrLf & _
 If doc.LoadXML(UpdateHierarchyHeader & UpdateHierarchyBody & UpdateHierarchyFooter) Then
     onenote.UpdateHierarchy doc.XML
 Else
-    MsgBox "Make sure notebook name is correct."
+    MsgBox "OneNote 2013 XML Data failed to load."
 End If
 
 End Sub
