@@ -8,6 +8,7 @@ Sub AlphabetizeOneNoteSection()
 'Microsoft XML, 6.0
 
     'I put this code together to solve a problem, I realize it is not perfectly optimized.
+    'Add this code to your vba editor in Excel and make sure the notebook you want to sort is open in OneNote.
     'If you have any input on how optimize the code, feel free to let me know.
     
 Dim notebookSortName As String
