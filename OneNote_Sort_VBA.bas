@@ -7,14 +7,14 @@ Sub AlphabetizeOneNoteSection()
 'Microsoft OneNote 15.0 Object Library
 'Microsoft XML, 6.0
 
-    'I put this code together to solve a problem, I realize it is not perfectly optimized.
-    'Add this code to your vba editor in Excel and make sure the notebook you want to sort is open in OneNote.
-    'If you have any input on how optimize the code, feel free to let me know.
-   
+'I put this code together to solve a problem, I realize it is not perfectly optimized.
+'Add this code to your vba editor in Excel and make sure the notebook you want to sort is open in OneNote.
+'If you have any input on how optimize the code, feel free to let me know.
+
 Dim notebookSortName As String
 
 'Change the name of the library to the one that needs to alphabetized
-notebookSortName = "Journal Entries"
+notebookSortName = "Put notebook name here"
 
 Dim onenote As onenote.Application
 Set onenote = New onenote.Application
@@ -49,7 +49,7 @@ If doc.LoadXML(oneNoteSectionsXml) Then
     Dim sectionNameXML As String
     Dim sectionIDXML As String
     Dim sectionPathXML As String
-    Dim sectionDeleted As String
+    Dim sectionDeletedXML As String
     Dim parentID As String
     
     Dim i As Integer
@@ -73,7 +73,6 @@ If doc.LoadXML(oneNoteSectionsXml) Then
     i = 0
     'put notebook id and names in array
     For Each nodeNoteBook In nodeNoteBooks
-    'ReDim test(0 To i, 0 To 1) As Variant
        notebookID = nodeNoteBook.Attributes.getNamedItem("ID").Text
        notebookName = nodeNoteBook.Attributes.getNamedItem("name").Text
        notebookIDXML = nodeNoteBook.Attributes.getNamedItem("ID").XML
@@ -109,9 +108,10 @@ If doc.LoadXML(oneNoteSectionsXml) Then
             sectionNameXML = nodeSection.Attributes.getNamedItem("name").XML
             sectionName = nodeSection.Attributes.getNamedItem("name").Text
             sectionPathXML = nodeSection.Attributes.getNamedItem("path").XML
-            
+
             If Not (nodeSection.Attributes.getNamedItem("isInRecycleBin") Is Nothing) Then
-            sectionDeleted = nodeSection.Attributes.getNamedItem("isInRecycleBin").Text 'Make sure the section to be sorted is not deleted
+            sectionDeletedXML = nodeSection.Attributes.getNamedItem("isInRecycleBin").XML
+            MsgBox sectionName
             End If
             
             
@@ -120,7 +120,7 @@ If doc.LoadXML(oneNoteSectionsXml) Then
             sectionArray(1, r) = sectionName
             sectionArray(2, r) = sectionIDXML
             sectionArray(3, r) = sectionPathXML
-            sectionArray(4, r) = sectionDeleted
+            sectionArray(4, r) = sectionDeletedXML
             
             'Header for the XML code
             UpdateHierarchyHeader = "<?xml version=" & Chr(34) & "1.0" & Chr(34) & "?>" & vbCrLf & _
@@ -163,8 +163,10 @@ For i = 1 To UBound(sectionArray)
     sectionName = sectionArray(i, 2)  'Name
     sectionIDXML = sectionArray(i, 3)  'ID XML
     sectionPathXML = sectionArray(i, 4)  'Path XML
-    If sectionDeleted <> "true" Then
+    sectionDeletedXML = sectionArray(i, 5) 'Deleted
+    If sectionDeletedXML <> "isInRecycleBin=""true""" Then
         UpdateHierarchyBody = UpdateHierarchyBody & vbCrLf & "<one:Section " & sectionIDXML & " " & sectionPathXML & "/>"
+        Debug.Print "isInRecycleBin=""true"""
     Else
         Debug.Print sectionName
     End If
@@ -179,8 +181,9 @@ UpdateHierarchyFooter = "    </one:Notebook>" & vbCrLf & _
 'combine xml elements and load them into xml reader. Then call OneNote API to update the hierarchy of the notebook
 If doc.LoadXML(UpdateHierarchyHeader & UpdateHierarchyBody & UpdateHierarchyFooter) Then
     onenote.UpdateHierarchy doc.XML
+    Debug.Print doc.XML
 Else
-    MsgBox "OneNote 2013 XML Data failed to load."
+    MsgBox "Make sure a valid notebook name is in notebookSortName."
 End If
 
 End Sub
