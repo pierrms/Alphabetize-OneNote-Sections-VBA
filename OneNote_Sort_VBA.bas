@@ -1,7 +1,7 @@
 Attribute VB_Name = "OneNoteSort"
 
 
-Sub AlphabetizeOneNoteSection()
+Sub AlphabetizeOneNote_NoteBook()
 
 'Make sure to add the references to:
 'Microsoft OneNote 15.0 Object Library
