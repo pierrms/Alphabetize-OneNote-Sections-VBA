@@ -167,7 +167,7 @@ UpdateHierarchyFooter = "    </one:Notebook>" & vbCrLf & _
 If doc.LoadXML(UpdateHierarchyHeader & UpdateHierarchyBody & UpdateHierarchyFooter) Then
     onenote.UpdateHierarchy doc.XML
 Else
-    MsgBox "OneNote 2013 XML Data failed to load."
+    MsgBox "Make sure notebook name is correct."
 End If
 
 End Sub
