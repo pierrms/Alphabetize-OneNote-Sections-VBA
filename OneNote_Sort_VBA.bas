@@ -111,7 +111,6 @@ If doc.LoadXML(oneNoteSectionsXml) Then
 
             If Not (nodeSection.Attributes.getNamedItem("isInRecycleBin") Is Nothing) Then
             sectionDeletedXML = nodeSection.Attributes.getNamedItem("isInRecycleBin").XML
-            MsgBox sectionName
             End If
             
             
